@@ -12,12 +12,14 @@ class RPDP_DATA_SHORTCODE extends RPDP_SHORTCODE{
 
   function getDefaultAtts(){
     return array(
-			'data'  => '',
-      'cache'	=> 10 // CACHE FOR MINUTES
+			'data'  => ''
 		);
   }
 
   function mainShortcode( $atts ){
+
+    global $rpdp_admin;
+    $cache_time = (int) $rpdp_admin->getSettingByKey('cache_time');
 
     /* GET ATTRIBUTES FROM THE SHORTCODE */
 		$atts = $this->getShortcodeAtts( $atts );
@@ -29,20 +31,24 @@ class RPDP_DATA_SHORTCODE extends RPDP_SHORTCODE{
 			return "Add Api Key";
 		}
 
-    /* CHECK IF THE DATA EXISTS IN CACHE */
-		if( isset( $atts['cache'] ) && $atts['cache'] && is_numeric( $atts['cache'] ) ){
-			$data = $this->getCache();
-		}
+    /* CHECK IF CACHE TIME IS SET IF YES THEN CHECK IF THE DATA EXISTS IN CACHE  */
+    if( $cache_time ){
+      $data = $this->getCache();
+    }
 
     // IF NO VALUE IN CACHE
     if ( $data === false ) {
-      $data = (array)$this->getRpdpData();
-			if( $data && isset( $atts['cache'] ) && $atts['cache'] ){
-				$this->setCacheKey( $data, $atts );
-			}
+      $response = $this->getRpdpData();
+      // CHECK IF RESPONSE EXISTS
+      if( $response ){
+        $data = (array)$response;
+  			if( $cache_time ){
+  				$this->setCacheKey( $data );
+  			}
+      }
 		}
 
-    $count = $data ? $data[ $atts['data'] ] : "Something went wrong";
+    $count = $data ? $data[ $atts['data'] ] : 0;
 
     return $count;
 

@@ -54,22 +54,24 @@ class RPDP_SHORTCODE extends RPDP_BASE{
 
 	function getCache(){
 		$cache_key = $this->getCacheKey();
-		// TRY TO GET VALUE FROM WORDPRESS CACHE
+		// GET VALUE FROM WORDPRESS CACHE
 		return get_transient( $cache_key );
 	}
 
-	function setCacheKey( $data, $atts ){
+	function setCacheKey( $data ){
+		global $rpdp_admin;
 		$cache_key = $this->getCacheKey();
+		$cache_time = (int) $rpdp_admin->getSettingByKey('cache_time');
 
 		// STORE VALUE IN CACHE FOR MINUTES
-		set_transient( $cache_key, $data, ( $atts['cache'] * MINUTE_IN_SECONDS ) );
-
+		set_transient( $cache_key, $data, ( $cache_time * MINUTE_IN_SECONDS ) );
 	}
 
 	function getRpdpApiKey(){ return $this->rpdp_api_key; }
 
 	function setRpdpApiKey(){
-		$this->rpdp_api_key = '';
+		global $rpdp_admin;
+		$this->rpdp_api_key = $rpdp_admin->getSettingByKey('api_key');
 	}
 
 	// TO BE IMPLEMENTED BY CHILD CLASSES - HANDLES SHORTCODE CREATION
